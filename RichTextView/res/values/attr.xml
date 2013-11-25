@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="WeiboTextView">
+        <attr name="userColor" format="reference|color" />
+        <attr name="userPressedColor" format="reference|color" />
+        <attr name="stockColor" format="reference|color" />
+        <attr name="locationPreColor" format="reference|color" />
+        <attr name="locationTextColor" format="reference|color" />
+        <attr name="stockPressedColor" format="reference|color" />
+        <attr name="textColor" format="reference|color" />
+        <attr name="lineSpace" format="dimension" />
+    </declare-styleable>
+
+</resources>
