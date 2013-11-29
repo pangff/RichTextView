@@ -50,6 +50,7 @@ public class WeiboTextView extends TextView {
   Paint paint;
   Paint paintBmp;
   private float mDensity = 1.0f;
+  private float textSize ;
 
   public WeiboTextView(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -58,7 +59,15 @@ public class WeiboTextView extends TextView {
 
   public void setContent(String html) {
     dataList.clear();
-    List<WeiboText> list = WeiBoTextViewHelper.getInstance().paraeHTML(this.getContext(),html);
+    List<WeiboText> list = WeiBoTextViewHelper.getInstance().paraeHTML(getContext().getApplicationContext(),html);
+    dataList.addAll(list);
+    mDisplayHeight = 0;
+    requestLayout();
+  }
+  
+  public void setContentWithOutUser(String html) {
+    dataList.clear();
+    List<WeiboText> list = WeiBoTextViewHelper.getInstance().paraeHTMLWithOutUser(getContext().getApplicationContext(),html);
     dataList.addAll(list);
     mDisplayHeight = 0;
     requestLayout();
@@ -79,6 +88,7 @@ public class WeiboTextView extends TextView {
         a.getColor(R.styleable.WeiboTextView_locationTextColor, Color.parseColor("#939393"));
     COLOR_TEXT = a.getColor(R.styleable.WeiboTextView_textColor, Color.parseColor("#454545"));
     lineSpace = a.getDimension(R.styleable.WeiboTextView_lineSpace, 10f);
+    textSize = this.getTextSize();
   }
 
   /**
@@ -155,7 +165,6 @@ public class WeiboTextView extends TextView {
     if (paintBmp == null) {
       paintBmp = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     }
-    float textSize = this.getTextSize();
 
     for (WeiboText info : infoList) {
       int rectIndex = 0;
@@ -174,7 +183,8 @@ public class WeiboTextView extends TextView {
        */
       if (info.getType() == WeiboText.TYPE_ICON) {
         Bitmap faceBmp =
-            ((BitmapDrawable) EmojiDrawableUtil.getEmojiDrawable(this.getContext(), Integer.parseInt(info.getKey()))).getBitmap();
+            ((BitmapDrawable) EmojiDrawableUtil.getEmojiDrawable(
+                getContext().getApplicationContext(), Integer.parseInt(info.getKey()))).getBitmap();
         rect = rectList.get(rectIndex);
         if (faceBmp != null && null != rect) {
           float padding_v = (rect.bottom - rect.top - fontHeight) / 2;
@@ -303,6 +313,19 @@ public class WeiboTextView extends TextView {
           paint.setColor(COLOR_STOCK_PRESS);
         }
       }
+      if(info.getType() == WeiboText.TYPE_STYLE_TEXT){
+    	  	  if(info.getColor()!=-1){
+    	  		 paint.setColor(info.getColor());
+    	  	  }
+    	  	  if(info.getSize()!=-1){
+    	  		paint.setTextSize(info.getSize());
+    	  	  }
+    	  	  if(info.isBold()){
+    	  		paint.setFakeBoldText(true);
+    	  	  }
+    	  	 ascent = paint.ascent();
+    	     fontHeight = paint.descent() - ascent;
+      }
       int nCount = rectList.size();
       while (rectIndex < nCount) {
         rect = rectList.get(rectIndex);
@@ -310,10 +333,10 @@ public class WeiboTextView extends TextView {
         if (rect.start < 0 || rect.end < 0) {
           continue;
         }
-        canvas.drawText(strContent, rect.start, rect.end, rect.left,
-            rect.top - ascent - ascent / 8, paint);
+        canvas.drawText(strContent, rect.start, rect.end, rect.left,rect.centerY()+fontHeight/4, paint);
       }
       paint.setTextSize(textSize);
+      paint.setFakeBoldText(false);
     }
 
     return y + fontHeight;
@@ -328,7 +351,7 @@ public class WeiboTextView extends TextView {
   private void measureView(int widthMeasureSpec, int heightMeasureSpec) {
     if (dataList.size() == 0) {
       mDisplayHeight = getPaddingTop() + getPaddingBottom();
-      mDisplayWidth = getPaddingLeft() + getPaddingLeft();
+      mDisplayWidth = getPaddingLeft() + getPaddingRight();
       return;
     }
     int specMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -357,7 +380,11 @@ public class WeiboTextView extends TextView {
     int nLineRightLimit = maxRight;
     final int paddingLeft = getPaddingLeft();
 
-    for (WeiboText info : dataList) {
+    for (int m=0;m<dataList.size();m++) {
+      WeiboText info =  dataList.get(m);
+      if(m==0){
+    	  	x=paddingLeft;
+      }
       nLineRightLimit = maxRight;
       info.clearRect();
 
@@ -372,6 +399,7 @@ public class WeiboTextView extends TextView {
             bmpWidth = bmpWidth / mDensity;
             bmpHeight = bmpHeight / mDensity;
           }
+          
           // face icon has left and right margins.
           if (x + bmpWidth >= nLineRightLimit) {
             y += lineHeight;
@@ -427,12 +455,11 @@ public class WeiboTextView extends TextView {
             bmpWidth = bmpWidth / mDensity;
             bmpHeight = bmpHeight / mDensity;
           }
-          float textSize = this.getTextSize();
           paint.setTextSize(textSize * 0.8f);
           float textWidth = paint.measureText("网页链接");
           paint.setTextSize(textSize);
           // face icon has left and right margins.
-          if (x + bmpWidth + textSize + linkExtraSpace >= nLineRightLimit) {
+          if (x + bmpWidth + textWidth + linkExtraSpace >= nLineRightLimit) {
             y += lineHeight;
             lineHeight = fontHeight + lineSpace;
             x = paddingLeft;
@@ -446,6 +473,11 @@ public class WeiboTextView extends TextView {
           x += bmpWidth + textWidth + linkExtraSpace + linkInnerPadding * 2;
         }
         continue;
+      }
+      if(info.getType() == WeiboText.TYPE_STYLE_TEXT){
+    	  	if(info.getSize()!=-1){
+    	  		paint.setTextSize(info.getSize());
+    	  	}
       }
       String strContent = info.getContent();
       if (null == strContent) {
@@ -513,6 +545,7 @@ public class WeiboTextView extends TextView {
         }
         strStart += strLine.length() + FLAG_NEW_LINE.length();
       }
+      paint.setTextSize(textSize);
     }
     float specHeight = y + getPaddingBottom();
     if (x > paddingLeft) {
@@ -585,16 +618,15 @@ public class WeiboTextView extends TextView {
           currentTouchedInfo = null;
           info.setPressed(false);
           if (info.getType() == WeiboText.TYPE_USER || info.getType() == WeiboText.TYPE_ATUSER) {
-        	  	Toast.makeText(this.getContext(),"点击用户", Toast.LENGTH_SHORT).show();
+        	  	Toast.makeText(getContext(), "显示用户", Toast.LENGTH_SHORT).show();
           } else if (info.getType() == WeiboText.TYPE_STOCK) {
-        	  	Toast.makeText(this.getContext(),"点击股票", Toast.LENGTH_SHORT).show();
+        	  	Toast.makeText(getContext(), "显示股票", Toast.LENGTH_SHORT).show();
           } else if (info.getType() == WeiboText.TYPE_LINK) {
-        	      Toast.makeText(this.getContext(),"点击链接", Toast.LENGTH_SHORT).show();
-        	  	  Intent intent = new Intent();
-              intent.setAction("android.intent.action.VIEW");
-              Uri content_url = Uri.parse(info.getKey());
-              intent.setData(content_url);
-              ((Activity) getContext()).startActivity(intent);
+            Intent intent = new Intent();
+            intent.setAction("android.intent.action.VIEW");
+            Uri content_url = Uri.parse(info.getKey());
+            intent.setData(content_url);
+            ((Activity) getContext()).startActivity(intent);
           }
           invalidate();
         }

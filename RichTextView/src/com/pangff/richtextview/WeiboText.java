@@ -18,9 +18,13 @@ public class WeiboText{
 	public static final int TYPE_LOCATION_PRE = 6;
 	public static final int TYPE_LOCATION_ICON = 7;
 	public static final int TYPE_LOCATION_TEXT = 8;
+	public static final int TYPE_STYLE_TEXT = 9;
 	
 	private String content;
 	private String key;
+	private int color;
+	private boolean isBold;
+	private int size=-1;
 	
 	private boolean clickable;
 	private boolean isPressed = false;
@@ -90,7 +94,29 @@ public class WeiboText{
 	public void setPressed(boolean isPressed) {
 		this.isPressed = isPressed;
 	}
-	
-	
+
+	public int getColor() {
+		return color;
+	}
+
+	public void setColor(int color) {
+		this.color = color;
+	}
+
+	public boolean isBold() {
+		return isBold;
+	}
+
+	public void setBold(boolean isBold) {
+		this.isBold = isBold;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
 	
 }
