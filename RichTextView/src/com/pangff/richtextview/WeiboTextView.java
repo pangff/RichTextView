@@ -51,7 +51,12 @@ public class WeiboTextView extends TextView {
   Paint paintBmp;
   private float mDensity = 1.0f;
   private float textSize ;
-
+  Bitmap locationIcon;
+  Bitmap weiboLinkbtnIcon;
+  Bitmap weiboLinkbtnIconPressed;
+  NinePatchDrawable link_bg;
+  Bitmap firstFaceBmp;
+  
   public WeiboTextView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init(context, attrs);
@@ -77,18 +82,19 @@ public class WeiboTextView extends TextView {
     mDensity = this.getContext().getResources().getDisplayMetrics().density;
     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.WeiboTextView);
     COLOR_USER = a.getColor(R.styleable.WeiboTextView_userColor, Color.parseColor("#01A7E5"));
-    COLOR_USER_PRESS =
-        a.getColor(R.styleable.WeiboTextView_userPressedColor, Color.parseColor("#b10000"));
+    COLOR_USER_PRESS = a.getColor(R.styleable.WeiboTextView_userPressedColor, Color.parseColor("#b10000"));
     COLOR_STOCK = a.getColor(R.styleable.WeiboTextView_stockColor, Color.parseColor("#FDAF45"));
-    COLOR_STOCK_PRESS =
-        a.getColor(R.styleable.WeiboTextView_stockPressedColor, Color.parseColor("#0069a6"));
-    COLOR_LOCATION_PRE =
-        a.getColor(R.styleable.WeiboTextView_locationPreColor, Color.parseColor("#939393"));
-    COLOR_LOCATION_TEXT =
-        a.getColor(R.styleable.WeiboTextView_locationTextColor, Color.parseColor("#939393"));
+    COLOR_STOCK_PRESS = a.getColor(R.styleable.WeiboTextView_stockPressedColor, Color.parseColor("#0069a6"));
+    COLOR_LOCATION_PRE = a.getColor(R.styleable.WeiboTextView_locationPreColor, Color.parseColor("#939393"));
+    COLOR_LOCATION_TEXT = a.getColor(R.styleable.WeiboTextView_locationTextColor, Color.parseColor("#939393"));
     COLOR_TEXT = a.getColor(R.styleable.WeiboTextView_textColor, Color.parseColor("#454545"));
     lineSpace = a.getDimension(R.styleable.WeiboTextView_lineSpace, 10f);
     textSize = this.getTextSize();
+    locationIcon = ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.position_pic)).getBitmap();
+    link_bg = (NinePatchDrawable) this.getResources().getDrawable(R.drawable.weibo_linkbtn_bg);
+    weiboLinkbtnIcon = ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.weibo_linkbtn_icon)).getBitmap();
+    weiboLinkbtnIconPressed = ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.weibo_linkbtn_icon_pressed)).getBitmap();
+    firstFaceBmp = ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.emoji_0)).getBitmap();
   }
 
   /**
@@ -182,9 +188,7 @@ public class WeiboTextView extends TextView {
        * 如果是表情
        */
       if (info.getType() == WeiboText.TYPE_ICON) {
-        Bitmap faceBmp =
-            ((BitmapDrawable) EmojiDrawableUtil.getEmojiDrawable(
-                getContext().getApplicationContext(), Integer.parseInt(info.getKey()))).getBitmap();
+        Bitmap faceBmp = info.getFaceBmp();
         rect = rectList.get(rectIndex);
         if (faceBmp != null && null != rect) {
           float padding_v = (rect.bottom - rect.top - fontHeight) / 2;
@@ -202,9 +206,6 @@ public class WeiboTextView extends TextView {
        * 如果是位置
        */
       if (info.getType() == WeiboText.TYPE_LOCATION_ICON) {
-        Bitmap locationIcon =
-            ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.position_pic))
-                .getBitmap();
         rect = rectList.get(rectIndex);
         if (locationIcon != null && null != rect) {
           Rect dst = new Rect();
@@ -237,19 +238,13 @@ public class WeiboTextView extends TextView {
        * 如果是链接
        */
       if (info.getType() == WeiboText.TYPE_LINK) {
-        NinePatchDrawable bg =
-            (NinePatchDrawable) this.getResources().getDrawable(R.drawable.weibo_linkbtn_bg);
         Bitmap icon = null;
         if (!info.isPressed()) {
           paint.setColor(COLOR_USER);
-          icon =
-              ((BitmapDrawable) getContext().getResources().getDrawable(
-                  R.drawable.weibo_linkbtn_icon)).getBitmap();
+          icon = weiboLinkbtnIcon;
         } else {
           paint.setColor(COLOR_USER_PRESS);
-          icon =
-              ((BitmapDrawable) getContext().getResources().getDrawable(
-                  R.drawable.weibo_linkbtn_icon_pressed)).getBitmap();
+          icon = weiboLinkbtnIconPressed;
         }
         rect = rectList.get(rectIndex);
         float padding_v = 0;
@@ -260,10 +255,10 @@ public class WeiboTextView extends TextView {
           resultWidth = (rect.right - rect.left) / (rect.bottom - rect.top) * fontHeight;
           padding_h = (rect.right - rect.left - resultWidth) / 2;
         }
-        if (bg != null) {
-          bg.setBounds((int) (rect.left), (int) (rect.top + padding_v / 4), (int) (rect.right),
+        if (link_bg != null) {
+        		link_bg.setBounds((int) (rect.left), (int) (rect.top + padding_v / 4), (int) (rect.right),
               (int) (rect.bottom - padding_v / 4));
-          bg.draw(canvas);
+        		link_bg.draw(canvas);
         }
 
         float icon_height = fontHeight * 0.8f;
@@ -389,17 +384,13 @@ public class WeiboTextView extends TextView {
       info.clearRect();
 
       if (info.getType() == WeiboText.TYPE_ICON) {// 表情
-        Bitmap faceBmp =
-            ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.emoji_0))
-                .getBitmap();
-        if (faceBmp != null) {
-          float bmpWidth = faceBmp.getWidth();
-          float bmpHeight = faceBmp.getHeight();
+        if (firstFaceBmp != null) {
+          float bmpWidth = firstFaceBmp.getWidth();
+          float bmpHeight = firstFaceBmp.getHeight();
           if (mDensity > 1) {
             bmpWidth = bmpWidth / mDensity;
             bmpHeight = bmpHeight / mDensity;
           }
-          
           // face icon has left and right margins.
           if (x + bmpWidth >= nLineRightLimit) {
             y += lineHeight;
@@ -417,12 +408,9 @@ public class WeiboTextView extends TextView {
       }
 
       if (info.getType() == WeiboText.TYPE_LOCATION_ICON) {// 位置图标
-        Bitmap faceBmp =
-            ((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.position_pic))
-                .getBitmap();
-        if (faceBmp != null) {
-          float bmpWidth = faceBmp.getWidth();
-          float bmpHeight = faceBmp.getHeight();
+        if (locationIcon != null) {
+          float bmpWidth = locationIcon.getWidth();
+          float bmpHeight = locationIcon.getHeight();
           if (mDensity > 1) {
             bmpWidth = bmpWidth / mDensity;
             bmpHeight = bmpHeight / mDensity;
@@ -445,12 +433,10 @@ public class WeiboTextView extends TextView {
 
 
       if (info.getType() == WeiboText.TYPE_LINK) {// 链接
-        Bitmap icon =
-            ((BitmapDrawable) getContext().getResources()
-                .getDrawable(R.drawable.weibo_linkbtn_icon)).getBitmap();
-        if (icon != null) {
-          float bmpWidth = icon.getWidth();
-          float bmpHeight = icon.getHeight();
+    	  	
+        if (weiboLinkbtnIcon != null) {
+          float bmpWidth = weiboLinkbtnIcon.getWidth();
+          float bmpHeight = weiboLinkbtnIcon.getHeight();
           if (mDensity > 1) {
             bmpWidth = bmpWidth / mDensity;
             bmpHeight = bmpHeight / mDensity;

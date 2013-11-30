@@ -3,6 +3,7 @@ package com.pangff.richtextview;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Bitmap;
 import android.graphics.RectF;
 
 
@@ -28,6 +29,8 @@ public class WeiboText{
 	
 	private boolean clickable;
 	private boolean isPressed = false;
+	
+	private Bitmap faceBmp;
 	
 	private List<WeiboInfoRect> rectList = new ArrayList<WeiboInfoRect>();
 
@@ -117,6 +120,14 @@ public class WeiboText{
 
 	public void setSize(int size) {
 		this.size = size;
+	}
+
+	public Bitmap getFaceBmp() {
+		return faceBmp;
+	}
+
+	public void setFaceBmp(Bitmap faceBmp) {
+		this.faceBmp = faceBmp;
 	}
 	
 }

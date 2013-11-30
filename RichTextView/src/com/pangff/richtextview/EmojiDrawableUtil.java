@@ -191,8 +191,9 @@ public final class EmojiDrawableUtil {
         weiboText.setType(WeiboText.TYPE_ICON);
         weiboText.setKey(index + "");
         weiboText.setContent(c + "");
+        weiboText.setFaceBmp(((BitmapDrawable) EmojiDrawableUtil.getEmojiDrawable(context.getApplicationContext(), index)).getBitmap());
         weiboTextList.add(weiboText);
-
+        
         currentS = "";
       } else {
         currentS += c;

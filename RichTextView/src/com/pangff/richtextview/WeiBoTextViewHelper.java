@@ -36,7 +36,6 @@ public class WeiBoTextViewHelper {
 
   /**
    * 获取html转换后的data
-   * 
    * @param html
    * @return
    */
