@@ -1,14 +1,24 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity" >
 
     <com.pangff.richtextview.WeiboTextView
-        android:layout_width="wrap_content"
         android:id="@+id/richTextView"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#123456"
+        android:text="@string/hello_world" />
+    
+    <com.pangff.richtextview.WeiboTextView
+        android:id="@+id/richTextView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#123456"
+        android:textSize="10sp"
+        android:visibility="gone"
         android:text="@string/hello_world" />
 
-</RelativeLayout>
+</LinearLayout>

@@ -196,7 +196,7 @@ public class WeiboTextView extends TextView {
           float padding_h = (rect.right - rect.left - resultWidth) / 2;
 
           Rect dst = new Rect();
-          dst.set((int) (rect.left + padding_h), (int) (rect.top), (int) (rect.right - padding_h),
+          dst.set((int) (rect.left + padding_h), (int) (rect.top+ padding_v), (int) (rect.right - padding_h),
               (int) (rect.bottom - padding_v));
           canvas.drawBitmap(faceBmp, null, dst, paintBmp);
         }
@@ -274,7 +274,7 @@ public class WeiboTextView extends TextView {
         }
         paint.setTextSize(textSize * 0.8f);
         canvas.drawText("网页链接", 0, 4, rect.left + linkInnerPadding + icon_width + padding_h / 2,
-            rect.top - ascent - ascent / 8, paint);
+          rect.centerY()+fontHeight/4, paint);
       }
       /**
        * 如果是用户
@@ -437,22 +437,23 @@ public class WeiboTextView extends TextView {
         if (weiboLinkbtnIcon != null) {
           float bmpWidth = weiboLinkbtnIcon.getWidth();
           float bmpHeight = weiboLinkbtnIcon.getHeight();
-          if (mDensity > 1) {
-            bmpWidth = bmpWidth / mDensity;
-            bmpHeight = bmpHeight / mDensity;
-          }
+//          if (mDensity > 1) {
+//            bmpWidth = bmpWidth / mDensity;
+//            bmpHeight = bmpHeight / mDensity;
+//          }
           paint.setTextSize(textSize * 0.8f);
           float textWidth = paint.measureText("网页链接");
           paint.setTextSize(textSize);
+          bmpWidth = lineHeight / bmpHeight * bmpWidth;
           // face icon has left and right margins.
-          if (x + bmpWidth + textWidth + linkExtraSpace >= nLineRightLimit) {
+          if (x + bmpWidth + textWidth + linkInnerPadding * 2 >= nLineRightLimit) {
             y += lineHeight;
             lineHeight = fontHeight + lineSpace;
             x = paddingLeft;
           }
           rect = new WeiboInfoRect();
 
-          bmpWidth = lineHeight / bmpHeight * bmpWidth;
+        
           rect.set(x + linkExtraSpace / 2, y, x + bmpWidth + textWidth + linkInnerPadding * 2
               + linkExtraSpace / 2, y + lineHeight);
           info.addRect(rect);
@@ -532,6 +533,11 @@ public class WeiboTextView extends TextView {
         strStart += strLine.length() + FLAG_NEW_LINE.length();
       }
       paint.setTextSize(textSize);
+      if(strContent.endsWith("\n")){
+        y += lineHeight;
+        lineHeight = fontHeight + lineSpace;
+        x = paddingLeft;
+      }
     }
     float specHeight = y + getPaddingBottom();
     if (x > paddingLeft) {

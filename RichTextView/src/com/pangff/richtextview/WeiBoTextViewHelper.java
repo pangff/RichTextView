@@ -75,7 +75,7 @@ public class WeiBoTextViewHelper {
           text.setClickable(false);
           text.setType(WeiboText.TYPE_LOCATION_PRE);
           text.setKey(getAttr(r, "lbs", "lon") + "|" + getAttr(r, "lbs", "lat"));
-          text.setContent("\n我在:");
+          text.setContent("我在:");
           dataList.add(text);
 
           // 位置图标
@@ -167,7 +167,7 @@ public class WeiBoTextViewHelper {
 	          text.setClickable(false);
 	          text.setType(WeiboText.TYPE_LOCATION_PRE);
 	          text.setKey(getAttr(r, "lbs", "lon") + "|" + getAttr(r, "lbs", "lat"));
-	          text.setContent("\n我在:");
+	          text.setContent("我在:");
 	          dataList.add(text);
 
 	          // 位置图标
